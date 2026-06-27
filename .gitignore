@@ -1,0 +1,24 @@
+# API Anahtarları ve ortam değişkenleri - ASLA GitHub'a yükleme!
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Database dosyası (isteğe bağlı - dev ortamında tutmak isteyebilirsin)
+# lms.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

@@ -137,10 +137,13 @@ def api_post(endpoint: str, payload: dict):
         st.error(f"API hatası: {exc}")
     return None
 
-def check_api_health() -> dict:
+@st.cache_data(ttl=10)
+def check_api_health(base_url: str = FASTAPI_URL) -> dict:
     try:
-        r = requests.get(f"{FASTAPI_URL}/health", timeout=5)
-        return r.json()
+        r = requests.get(f"{base_url}/health", timeout=10)
+        if r.status_code == 200:
+            return r.json()
+        return {}
     except Exception:
         return {}
 
@@ -149,7 +152,7 @@ st.sidebar.markdown("## 🎓 AI Destekli LMS")
 st.sidebar.markdown("---")
 
 if st.session_state.user is None:
-    login_tab = st.sidebar.radio("", ["🔑 Giriş Yap", "📝 Kayıt Ol"], label_visibility="collapsed")
+    login_tab = st.sidebar.radio("İşlem Seçin", ["🔑 Giriş Yap", "📝 Kayıt Ol"], label_visibility="collapsed")
 
     if login_tab == "🔑 Giriş Yap":
         st.sidebar.markdown("### Giriş")

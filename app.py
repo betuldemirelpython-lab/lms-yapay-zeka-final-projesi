@@ -121,6 +121,8 @@ if "users_db" not in st.session_state:
 if "content_store" not in st.session_state:
     st.session_state.content_store = []  # list of dicts
 
+page = None
+
 def _hash(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
 

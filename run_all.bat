@@ -37,7 +37,7 @@ if not exist .env (
 rem -------------------------------------------------
 rem 4. FastAPI (AI Servisi) başlat
 rem -------------------------------------------------
-start "" cmd /c "uvicorn ai_service:app --reload"
+start "" cmd /c "venv\Scripts\python.exe -m uvicorn ai_service:app --reload"
 
 rem -------------------------------------------------
 rem 5. Streamlit UI'yi başlat

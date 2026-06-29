@@ -120,6 +120,10 @@ if "users_db" not in st.session_state:
     st.session_state.users_db = {}
 if "content_store" not in st.session_state:
     st.session_state.content_store = []  # list of dicts
+if "selected_course" not in st.session_state:
+    st.session_state.selected_course = None
+if "selected_course_detail" not in st.session_state:
+    st.session_state.selected_course_detail = None
 
 page = None
 
@@ -253,9 +257,9 @@ elif page == "📚 Kurslar":
     st.markdown("# 📚 Kurs Listesi")
     st.markdown("---")
     courses = [
-        {"title": "Python Programlama", "desc": "Temel Python sözdizimi, veri yapıları ve nesne yönelimli programlama.", "icon": "🐍", "level": "Başlangıç"},
-        {"title": "Derin Öğrenme", "desc": "Yapay sinir ağları, CNN, RNN ve modern derin öğrenme mimarileri.", "icon": "🧠", "level": "İleri"},
-        {"title": "Veri Bilimi", "desc": "Pandas, NumPy, Matplotlib ile veri analizi ve görselleştirme.", "icon": "📊", "level": "Orta"},
+        {"title": "Python Programlama", "desc": "Temel Python sözdizimi, veri yapıları ve nesne yönelimli programlama.", "icon": "🐍", "level": "Başlangıç", "detail": "Bu kurs, Python dilinin temellerini ve uygulamalı egzersizlerle öğrenmeyi sağlar."},
+        {"title": "Derin Öğrenme", "desc": "Yapay sinir ağları, CNN, RNN ve modern derin öğrenme mimarileri.", "icon": "🧠", "level": "İleri", "detail": "Bu kurs, ileri düzey model mimarileri ve gerçek dünya uygulamaları üzerine odaklanır."},
+        {"title": "Veri Bilimi", "desc": "Pandas, NumPy, Matplotlib ile veri analizi ve görselleştirme.", "icon": "📊", "level": "Orta", "detail": "Bu kurs, veri temizleme, keşif ve görselleştirme tekniklerini öğretir."},
     ]
     for c in courses:
         col_a, col_b = st.columns([4, 1])
@@ -268,7 +272,19 @@ elif page == "📚 Kurslar":
             """, unsafe_allow_html=True)
         with col_b:
             st.markdown("<br>", unsafe_allow_html=True)
-            st.button("Detay →", key=f"detail_{c['title']}")
+            if st.button("Detay →", key=f"detail_{c['title']}"):
+                st.session_state.selected_course = c['title']
+                st.session_state.selected_course_detail = c['detail']
+                st.rerun()
+
+    if st.session_state.selected_course:
+        st.markdown("---")
+        st.markdown(f"### 📌 {st.session_state.selected_course} Detayları")
+        st.info(st.session_state.selected_course_detail)
+        if st.button("← Geri Dön", key="back_to_courses"):
+            st.session_state.selected_course = None
+            st.session_state.selected_course_detail = None
+            st.rerun()
 
 elif page == "📝 İçerik Yükle":
     st.markdown("# 📝 İçerik Yükle")

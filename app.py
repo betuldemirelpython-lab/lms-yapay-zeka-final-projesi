@@ -64,10 +64,28 @@ html, body, [class*="css"] {
 .stTextInput > div > input,
 .stTextArea > div > textarea,
 .stSelectbox > div > div {
-    background: rgba(255,255,255,0.07) !important;
-    border: 1px solid rgba(99,102,241,0.4) !important;
+    background: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(129,140,248,0.8) !important;
     border-radius: 10px !important;
-    color: #e2e8f0 !important;
+    color: #f8fafc !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04) !important;
+    padding: 0.45rem 0.7rem !important;
+}
+
+.stTextInput > div > input::placeholder,
+.stTextArea > div > textarea::placeholder {
+    color: #cbd5e1 !important;
+}
+
+/* ── Sidebar labels and containers ── */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stMarkdown {
+    color: #f8fafc !important;
+}
+
+[data-testid="stSidebar"] .stRadio > label,
+[data-testid="stSidebar"] .stSelectbox > label {
+    font-weight: 600 !important;
 }
 
 /* ── Radio ── */

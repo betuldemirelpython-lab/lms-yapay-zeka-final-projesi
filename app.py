@@ -272,6 +272,12 @@ if "selected_course" not in st.session_state:
     st.session_state.selected_course = None
 if "selected_course_detail" not in st.session_state:
     st.session_state.selected_course_detail = None
+if "courses" not in st.session_state:
+    st.session_state.courses = [
+        {"title": "Python Programlama", "desc": "Temel Python sözdizimi, veri yapıları ve nesne yönelimli programlama.", "icon": "🐍", "level": "Başlangıç", "detail": "Bu kurs, Python dilinin temellerini ve uygulamalı egzersizlerle öğrenmeyi sağlar."},
+        {"title": "Derin Öğrenme", "desc": "Yapay sinir ağları, CNN, RNN ve modern derin öğrenme mimarileri.", "icon": "🧠", "level": "İleri", "detail": "Bu kurs, ileri düzey model mimarileri ve gerçek dünya uygulamaları üzerine odaklanır."},
+        {"title": "Veri Bilimi", "desc": "Pandas, NumPy, Matplotlib ile veri analizi ve görselleştirme.", "icon": "📊", "level": "Orta", "detail": "Bu kurs, veri temizleme, keşif ve görselleştirme tekniklerini öğretir."},
+    ]
 
 page = None
 
@@ -449,7 +455,7 @@ if page == "🏠 Ana Sayfa":
 
     col1, col2, col3, col4 = st.columns(4)
     metrics = [
-        ("📚 Kurslar", "3", "Mevcut kurs"),
+        ("📚 Kurslar", str(len(st.session_state.courses)), "Mevcut kurs"),
         ("📝 İçerikler", str(len(st.session_state.content_store)), "Yüklü içerik"),
         ("🤖 AI Durumu", "Aktif" if health.get("status") == "ok" else "Kapalı", ""),
         ("👤 Kullanıcı", st.session_state.user["name"], ""),
@@ -471,26 +477,58 @@ if page == "🏠 Ana Sayfa":
 elif page == "📚 Kurslar":
     st.markdown("# 📚 Kurs Listesi")
     st.markdown("---")
-    courses = [
-        {"title": "Python Programlama", "desc": "Temel Python sözdizimi, veri yapıları ve nesne yönelimli programlama.", "icon": "🐍", "level": "Başlangıç", "detail": "Bu kurs, Python dilinin temellerini ve uygulamalı egzersizlerle öğrenmeyi sağlar."},
-        {"title": "Derin Öğrenme", "desc": "Yapay sinir ağları, CNN, RNN ve modern derin öğrenme mimarileri.", "icon": "🧠", "level": "İleri", "detail": "Bu kurs, ileri düzey model mimarileri ve gerçek dünya uygulamaları üzerine odaklanır."},
-        {"title": "Veri Bilimi", "desc": "Pandas, NumPy, Matplotlib ile veri analizi ve görselleştirme.", "icon": "📊", "level": "Orta", "detail": "Bu kurs, veri temizleme, keşif ve görselleştirme tekniklerini öğretir."},
-    ]
-    for c in courses:
-        col_a, col_b = st.columns([4, 1])
-        with col_a:
-            st.markdown(f"""
-            <div class="card">
-                <h3>{c['icon']} {c['title']} <span class="badge">{c['level']}</span></h3>
-                <p style="color:#94a3b8; margin:0">{c['desc']}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_b:
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Detay →", key=f"detail_{c['title']}"):
-                st.session_state.selected_course = c['title']
-                st.session_state.selected_course_detail = c['detail']
+    
+    # ── Yeni Kurs Ekle Formu ──
+    with st.expander("➕ Yeni Kurs Ekle"):
+        new_title = st.text_input("Kurs Adı", key="new_course_title", placeholder="Örn: Yapay Zekaya Giriş")
+        new_desc = st.text_input("Kısa Açıklama", key="new_course_desc", placeholder="Örn: YZ kavramları ve temel algoritmalar.")
+        new_icon = st.text_input("Simge / Emoji", key="new_course_icon", value="🤖", placeholder="Örn: 🤖, 🐍, 🧠")
+        new_level = st.selectbox("Seviye", ["Başlangıç", "Orta", "İleri"], key="new_course_level")
+        new_detail = st.text_area("Detaylı Açıklama", key="new_course_detail", placeholder="Kursun detaylarını ve hedeflerini yazın...")
+        
+        if st.button("Kursu Ekle", key="btn_add_course"):
+            if not new_title.strip():
+                st.error("Kurs adı boş bırakılamaz.")
+            elif any(c["title"].lower() == new_title.strip().lower() for c in st.session_state.courses):
+                st.error("Bu isimde bir kurs zaten mevcut.")
+            else:
+                st.session_state.courses.append({
+                    "title": new_title.strip(),
+                    "desc": new_desc.strip(),
+                    "icon": new_icon.strip(),
+                    "level": new_level,
+                    "detail": new_detail.strip()
+                })
+                st.success(f"✅ **'{new_title}'** kursu başarıyla eklendi!")
                 st.rerun()
+    
+    st.markdown("### Aktif Kurslar")
+    if not st.session_state.courses:
+        st.info("Henüz hiç kurs tanımlanmamış. Yukarıdaki 'Yeni Kurs Ekle' formunu kullanarak kurs ekleyebilirsiniz.")
+    else:
+        for c in st.session_state.courses:
+            col_a, col_b, col_c = st.columns([4, 1, 1])
+            with col_a:
+                st.markdown(f"""
+                <div class="card">
+                    <h3>{c['icon']} {c['title']} <span class="badge">{c['level']}</span></h3>
+                    <p style="color:#94a3b8; margin:0">{c['desc']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            with col_b:
+                st.markdown("<br>", unsafe_allow_html=True)
+                if st.button("Detay →", key=f"detail_{c['title']}"):
+                    st.session_state.selected_course = c['title']
+                    st.session_state.selected_course_detail = c['detail']
+                    st.rerun()
+            with col_c:
+                st.markdown("<br>", unsafe_allow_html=True)
+                if st.button("🗑️ Sil", key=f"delete_{c['title']}"):
+                    st.session_state.courses = [x for x in st.session_state.courses if x["title"] != c["title"]]
+                    if st.session_state.selected_course == c["title"]:
+                        st.session_state.selected_course = None
+                        st.session_state.selected_course_detail = None
+                    st.rerun()
 
     if st.session_state.selected_course:
         st.markdown("---")
@@ -504,18 +542,23 @@ elif page == "📚 Kurslar":
 elif page == "📝 İçerik Yükle":
     st.markdown("# 📝 İçerik Yükle")
     st.markdown("---")
-    course = st.selectbox("Kurs Seçiniz", ["Python Programlama", "Derin Öğrenme", "Veri Bilimi"])
-    title  = st.text_input("İçerik Başlığı", placeholder="Ör: Değişkenler ve Veri Tipleri")
-    body   = st.text_area("İçerik Metni", height=220, placeholder="Ders notlarını buraya yazın...")
+    
+    course_options = [c["title"] for c in st.session_state.courses]
+    if not course_options:
+        st.warning("⚠️ İçerik yükleyebilmek için lütfen önce **📚 Kurslar** sayfasından bir kurs ekleyin.")
+    else:
+        course = st.selectbox("Kurs Seçiniz", course_options)
+        title  = st.text_input("İçerik Başlığı", placeholder="Ör: Değişkenler ve Veri Tipleri")
+        body   = st.text_area("İçerik Metni", height=220, placeholder="Ders notlarını buraya yazın...")
 
-    col_btn, col_clear = st.columns([1, 5])
-    with col_btn:
-        if st.button("⬆️ Yükle", key="btn_upload"):
-            if title and body:
-                st.session_state.content_store.append({"kurs": course, "başlık": title, "içerik": body[:100] + "..."})
-                st.success(f"✅ **'{title}'** içeriği **{course}** kursuna eklendi!")
-            else:
-                st.warning("Başlık ve içerik zorunludur.")
+        col_btn, col_clear = st.columns([1, 5])
+        with col_btn:
+            if st.button("⬆️ Yükle", key="btn_upload"):
+                if title and body:
+                    st.session_state.content_store.append({"kurs": course, "başlık": title, "içerik": body[:100] + "..."})
+                    st.success(f"✅ **'{title}'** içeriği **{course}** kursuna eklendi!")
+                else:
+                    st.warning("Başlık ve içerik zorunludur.")
 
     if st.session_state.content_store:
         st.markdown("---")

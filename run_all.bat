@@ -1,5 +1,7 @@
 @echo off
 setlocal
+set "PROJECT_DIR=%~dp0"
+cd /d "%PROJECT_DIR%"
 
 rem -------------------------------------------------
 rem 0. Çakışan Portları Temizle (FastAPI: 8000, Streamlit: 8501)
@@ -37,9 +39,13 @@ if not exist .env (
 rem -------------------------------------------------
 rem 4. FastAPI (AI Servisi) başlat
 rem -------------------------------------------------
-start "" cmd /c "venv\Scripts\python.exe -m uvicorn ai_service:app --reload"
+start "" /D "%PROJECT_DIR%" cmd /c "venv\Scripts\python.exe -m uvicorn ai_service:app --host 127.0.0.1 --port 8000 --reload"
+
+rem -- FastAPI'nin hazır olması için 3 saniye bekle --
+echo FastAPI servisi baslatiliyor, 3 saniye bekleniyor...
+timeout /t 3 /nobreak >nul
 
 rem -------------------------------------------------
 rem 5. Streamlit UI'yi başlat
 rem -------------------------------------------------
-streamlit run app.py
+streamlit run "%PROJECT_DIR%app.py" --server.port 8501

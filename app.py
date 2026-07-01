@@ -90,6 +90,12 @@ html, body, [class*="css"] {
 
 /* ── Radio ── */
 .stRadio > div { gap: 8px; }
+.stRadio > div > label {
+    color: #e2e8f0 !important;
+}
+.stRadio > div > label > div > p {
+    color: #e2e8f0 !important;
+}
 
 /* ── Headers ── */
 h1, h2, h3 { color: #e2e8f0 !important; }
@@ -99,6 +105,43 @@ h1, h2, h3 { color: #e2e8f0 !important; }
 .stWarning { background: rgba(245,158,11,0.15) !important; border-left: 4px solid #f59e0b !important; }
 .stError   { background: rgba(239,68,68,0.15)  !important; border-left: 4px solid #ef4444  !important; }
 .stInfo    { background: rgba(99,102,241,0.15)  !important; border-left: 4px solid #6366f1  !important; }
+
+/* ── Selectbox dropdown popup (renders outside sidebar as portal) ── */
+[data-baseweb="popover"],
+[data-baseweb="select"] [role="listbox"],
+ul[role="listbox"],
+[data-baseweb="menu"],
+[data-baseweb="popover"] > div {
+    background: #1e1e2e !important;
+    border: 1px solid rgba(99,102,241,0.4) !important;
+    border-radius: 10px !important;
+}
+
+[data-baseweb="popover"] li,
+ul[role="listbox"] li,
+[data-baseweb="menu"] li,
+[data-baseweb="menu"] [role="option"],
+ul[role="listbox"] [role="option"] {
+    color: #e2e8f0 !important;
+    background: transparent !important;
+}
+
+[data-baseweb="popover"] li:hover,
+ul[role="listbox"] li:hover,
+[data-baseweb="menu"] li:hover,
+[data-baseweb="menu"] [role="option"]:hover,
+ul[role="listbox"] [role="option"]:hover {
+    background: rgba(99,102,241,0.25) !important;
+    color: #ffffff !important;
+}
+
+/* Selectbox selected value text */
+.stSelectbox [data-baseweb="select"] > div {
+    color: #e2e8f0 !important;
+}
+.stSelectbox [data-baseweb="select"] span {
+    color: #e2e8f0 !important;
+}
 
 /* ── Card-like containers ── */
 .card {
@@ -161,10 +204,10 @@ def api_post(endpoint: str, payload: dict):
         st.error(f"API hatası: {exc}")
     return None
 
-@st.cache_data(ttl=10)
 def check_api_health(base_url: str = FASTAPI_URL) -> dict:
+    """Check API health without caching so UI always reflects real status."""
     try:
-        r = requests.get(f"{base_url}/health", timeout=10)
+        r = requests.get(f"{base_url}/health", timeout=5)
         if r.status_code == 200:
             return r.json()
         return {}

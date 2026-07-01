@@ -76,5 +76,3 @@ FASTAPI_URL=http://127.0.0.1:8000
 - **FastAPI yanıt vermiyor**: `uvicorn` penceresindeki hataları kontrol edin, `.env` dosyasındaki `OPENAI_API_KEY` doğru mu? 
 - **Bağımlılık hataları**: `pip install --upgrade pip` ardından `pip install -r requirements.txt`.
 
----
-**Hazır!** Yukarıdaki adımları izleyerek uygulamayı çalıştırabilir ve AI destekli LMS'inizi kullanmaya başlayabilirsiniz. Yardımcı olabileceğim başka bir konu olursa lütfen söyleyin!

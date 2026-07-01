@@ -2,16 +2,68 @@
 """Streamlit front-end for the AI-supported LMS (Turkish UI)."""
 
 import os
+import sys
 import hashlib
+import subprocess
+import time
 import requests
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from the same directory as this script
-_env_path = Path(__file__).resolve().parent / ".env"
-load_dotenv(dotenv_path=_env_path)
+# ── Load environment ───────────────────────────────────────────────────────────
+_project_dir = Path(__file__).resolve().parent
+_env_path = _project_dir / ".env"
+if _env_path.exists():
+    load_dotenv(dotenv_path=_env_path)
+
+# Also load Streamlit Cloud secrets into env vars (if available)
+try:
+    for key in ["GROQ_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "MODEL_NAME",
+                 "FASTAPI_URL", "DATABASE_URL", "JWT_SECRET"]:
+        if key in st.secrets:
+            os.environ[key] = st.secrets[key]
+except Exception:
+    pass
+
 FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000").strip()
+
+# ── Auto-start FastAPI backend ─────────────────────────────────────────────────
+def _ensure_fastapi_running():
+    """Start FastAPI backend automatically if not already running."""
+    # Quick check – is it already up?
+    try:
+        r = requests.get(f"{FASTAPI_URL}/health", timeout=2)
+        if r.status_code == 200:
+            return True
+    except Exception:
+        pass
+
+    # Not running → launch as background subprocess
+    try:
+        subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "ai_service:app",
+             "--host", "127.0.0.1", "--port", "8000"],
+            cwd=str(_project_dir),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        # Wait until it's ready (max ~8 seconds)
+        for _ in range(8):
+            time.sleep(1)
+            try:
+                r = requests.get(f"{FASTAPI_URL}/health", timeout=2)
+                if r.status_code == 200:
+                    return True
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return False
+
+# Run once per session
+if "fastapi_started" not in st.session_state:
+    st.session_state.fastapi_started = _ensure_fastapi_running()
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(

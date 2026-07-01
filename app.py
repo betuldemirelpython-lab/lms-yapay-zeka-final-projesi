@@ -135,11 +135,24 @@ ul[role="listbox"] [role="option"]:hover {
     color: #ffffff !important;
 }
 
-/* Selectbox selected value text */
-.stSelectbox [data-baseweb="select"] > div {
+/* Selectbox selected value text - force all nested elements */
+.stSelectbox [data-baseweb="select"] * {
     color: #e2e8f0 !important;
 }
-.stSelectbox [data-baseweb="select"] span {
+.stSelectbox [data-baseweb="select"] div[aria-selected] {
+    color: #e2e8f0 !important;
+}
+.stSelectbox [data-baseweb="select"] [data-baseweb="tag"] {
+    color: #e2e8f0 !important;
+}
+/* Selectbox arrow/icon */
+.stSelectbox svg {
+    fill: #e2e8f0 !important;
+}
+/* Sidebar selectbox label */
+[data-testid="stSidebar"] .stSelectbox label p,
+[data-testid="stSidebar"] .stSelectbox label span,
+[data-testid="stSidebar"] .stSelectbox label {
     color: #e2e8f0 !important;
 }
 

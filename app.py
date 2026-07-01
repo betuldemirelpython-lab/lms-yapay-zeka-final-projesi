@@ -41,7 +41,6 @@ html, body, [class*="css"] {
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
     border-right: 1px solid rgba(99,102,241,0.3) !important;
 }
-[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 
 /* ── Buttons ── */
 .stButton > button {
@@ -62,8 +61,7 @@ html, body, [class*="css"] {
 
 /* ── Input fields ── */
 .stTextInput > div > input,
-.stTextArea > div > textarea,
-.stSelectbox > div > div {
+.stTextArea > div > textarea {
     background: rgba(255,255,255,0.12) !important;
     border: 1px solid rgba(129,140,248,0.8) !important;
     border-radius: 10px !important;
@@ -77,24 +75,91 @@ html, body, [class*="css"] {
     color: #cbd5e1 !important;
 }
 
-/* ── Sidebar labels and containers ── */
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] .stMarkdown {
+/* ── Selectbox styling (for course select on content page) ── */
+.stSelectbox > div > div {
+    background: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(129,140,248,0.8) !important;
+    border-radius: 10px !important;
     color: #f8fafc !important;
 }
-
-[data-testid="stSidebar"] .stRadio > label,
-[data-testid="stSidebar"] .stSelectbox > label {
-    font-weight: 600 !important;
+.stSelectbox [data-baseweb="select"] * {
+    color: #f8fafc !important;
+}
+.stSelectbox svg {
+    fill: #e2e8f0 !important;
+}
+/* Selectbox dropdown popup */
+[data-baseweb="popover"],
+[data-baseweb="popover"] > div,
+[data-baseweb="menu"],
+ul[role="listbox"] {
+    background: #1e1e2e !important;
+    border: 1px solid rgba(99,102,241,0.4) !important;
+    border-radius: 10px !important;
+}
+[data-baseweb="popover"] li,
+[data-baseweb="menu"] li,
+ul[role="listbox"] li,
+[role="option"] {
+    color: #e2e8f0 !important;
+    background: transparent !important;
+}
+[data-baseweb="popover"] li:hover,
+[data-baseweb="menu"] li:hover,
+ul[role="listbox"] li:hover,
+[role="option"]:hover {
+    background: rgba(99,102,241,0.25) !important;
+    color: #ffffff !important;
 }
 
-/* ── Radio ── */
-.stRadio > div { gap: 8px; }
+/* ── Sidebar: ALL text elements ── */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] h4,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] .stMarkdown p {
+    color: #e2e8f0 !important;
+}
+
+/* ── Radio buttons (used for menu) ── */
+.stRadio > div {
+    gap: 4px !important;
+}
 .stRadio > div > label {
     color: #e2e8f0 !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
+    border-radius: 10px !important;
+    padding: 0.5rem 0.8rem !important;
+    margin-bottom: 2px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
 }
-.stRadio > div > label > div > p {
+.stRadio > div > label:hover {
+    background: rgba(99,102,241,0.15) !important;
+    border-color: rgba(99,102,241,0.5) !important;
+}
+/* Active/selected radio */
+.stRadio > div > label[data-checked="true"],
+.stRadio > div > label:has(input:checked) {
+    background: rgba(99,102,241,0.2) !important;
+    border-color: #6366f1 !important;
+}
+.stRadio > div > label > div,
+.stRadio > div > label > div > p,
+.stRadio > div > label > div > div,
+.stRadio > div > label span,
+.stRadio > div > label p {
     color: #e2e8f0 !important;
+}
+/* Hide radio circle */
+[data-testid="stSidebar"] .stRadio input[type="radio"] {
+    accent-color: #6366f1 !important;
 }
 
 /* ── Headers ── */
@@ -106,53 +171,9 @@ h1, h2, h3 { color: #e2e8f0 !important; }
 .stError   { background: rgba(239,68,68,0.15)  !important; border-left: 4px solid #ef4444  !important; }
 .stInfo    { background: rgba(99,102,241,0.15)  !important; border-left: 4px solid #6366f1  !important; }
 
-/* ── Selectbox dropdown popup (renders outside sidebar as portal) ── */
-[data-baseweb="popover"],
-[data-baseweb="select"] [role="listbox"],
-ul[role="listbox"],
-[data-baseweb="menu"],
-[data-baseweb="popover"] > div {
-    background: #1e1e2e !important;
-    border: 1px solid rgba(99,102,241,0.4) !important;
-    border-radius: 10px !important;
-}
-
-[data-baseweb="popover"] li,
-ul[role="listbox"] li,
-[data-baseweb="menu"] li,
-[data-baseweb="menu"] [role="option"],
-ul[role="listbox"] [role="option"] {
-    color: #e2e8f0 !important;
-    background: transparent !important;
-}
-
-[data-baseweb="popover"] li:hover,
-ul[role="listbox"] li:hover,
-[data-baseweb="menu"] li:hover,
-[data-baseweb="menu"] [role="option"]:hover,
-ul[role="listbox"] [role="option"]:hover {
-    background: rgba(99,102,241,0.25) !important;
-    color: #ffffff !important;
-}
-
-/* Selectbox selected value text - force all nested elements */
-.stSelectbox [data-baseweb="select"] * {
-    color: #e2e8f0 !important;
-}
-.stSelectbox [data-baseweb="select"] div[aria-selected] {
-    color: #e2e8f0 !important;
-}
-.stSelectbox [data-baseweb="select"] [data-baseweb="tag"] {
-    color: #e2e8f0 !important;
-}
-/* Selectbox arrow/icon */
-.stSelectbox svg {
-    fill: #e2e8f0 !important;
-}
-/* Sidebar selectbox label */
-[data-testid="stSidebar"] .stSelectbox label p,
-[data-testid="stSidebar"] .stSelectbox label span,
-[data-testid="stSidebar"] .stSelectbox label {
+/* ── Alert text inside ── */
+.stSuccess p, .stWarning p, .stError p, .stInfo p,
+.stAlert p, [data-testid="stAlert"] p {
     color: #e2e8f0 !important;
 }
 
@@ -176,6 +197,37 @@ ul[role="listbox"] [role="option"]:hover {
     font-size: 0.75rem;
     font-weight: 600;
     margin-left: 8px;
+}
+
+/* ── Sidebar menu button style ── */
+.menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    margin-bottom: 4px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 10px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.menu-item:hover {
+    background: rgba(99,102,241,0.15);
+    border-color: rgba(99,102,241,0.4);
+}
+
+/* ── Metric labels ── */
+[data-testid="stMetricLabel"],
+[data-testid="stMetricValue"],
+[data-testid="stMetricDelta"] {
+    color: #e2e8f0 !important;
+}
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricValue"] div,
+[data-testid="stMetricDelta"] div {
+    color: #e2e8f0 !important;
 }
 
 /* ── Divider ── */
@@ -217,22 +269,27 @@ def api_post(endpoint: str, payload: dict):
         st.error(f"API hatası: {exc}")
     return None
 
-def check_api_health(base_url: str = FASTAPI_URL) -> dict:
-    """Check API health without caching so UI always reflects real status."""
-    try:
-        r = requests.get(f"{base_url}/health", timeout=5)
-        if r.status_code == 200:
-            return r.json()
-        return {}
-    except Exception:
-        return {}
+def check_api_health() -> dict:
+    """Check API health – try up to 2 times with short timeout."""
+    for _ in range(2):
+        try:
+            r = requests.get(f"{FASTAPI_URL}/health", timeout=3)
+            if r.status_code == 200:
+                return r.json()
+        except Exception:
+            pass
+    return {}
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 st.sidebar.markdown("## 🎓 AI Destekli LMS")
 st.sidebar.markdown("---")
 
 if st.session_state.user is None:
-    login_tab = st.sidebar.radio("İşlem Seçin", ["🔑 Giriş Yap", "📝 Kayıt Ol"], label_visibility="collapsed")
+    login_tab = st.sidebar.radio(
+        "İşlem Seçin",
+        ["🔑 Giriş Yap", "📝 Kayıt Ol"],
+        label_visibility="collapsed",
+    )
 
     if login_tab == "🔑 Giriş Yap":
         st.sidebar.markdown("### Giriş")
@@ -272,14 +329,19 @@ else:
         provider = health.get("provider", "?").upper()
         st.sidebar.success(f"✅ AI Servisi Aktif – {provider}")
     else:
-        st.sidebar.warning("⚠️ AI Servisi bağlı değil")
+        st.sidebar.warning("⚠️ AI Servisi bağlı değil – run_all.bat çalıştırın")
 
     st.sidebar.markdown("---")
-    page = st.sidebar.selectbox(
-        "Menü",
+
+    # ── MENÜ: Radio butonları (selectbox yerine) ──
+    st.sidebar.markdown("### 📌 Menü")
+    page = st.sidebar.radio(
+        "Sayfa Seçin",
         ["🏠 Ana Sayfa", "📚 Kurslar", "📝 İçerik Yükle", "🔍 Metin Analizi", "🗂️ İçerik Özeti"],
         key="nav_menu",
+        label_visibility="collapsed",
     )
+
     st.sidebar.markdown("---")
     if st.sidebar.button("🚪 Çıkış Yap", key="btn_logout"):
         st.session_state.user = None
@@ -310,7 +372,7 @@ if page == "🏠 Ana Sayfa":
     metrics = [
         ("📚 Kurslar", "3", "Mevcut kurs"),
         ("📝 İçerikler", str(len(st.session_state.content_store)), "Yüklü içerik"),
-        ("🤖 AI Durumu", "Aktif" if check_api_health().get("status") == "ok" else "Kapalı", ""),
+        ("🤖 AI Durumu", "Aktif" if health.get("status") == "ok" else "Kapalı", ""),
         ("👤 Kullanıcı", st.session_state.user["name"], ""),
     ]
     for col, (icon_label, value, delta) in zip([col1, col2, col3, col4], metrics):

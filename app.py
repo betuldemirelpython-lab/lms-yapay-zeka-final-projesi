@@ -10,29 +10,36 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # ── Load environment ───────────────────────────────────────────────────────────
+print("DEBUG: [app.py] Starting execution...")
 _project_dir = Path(__file__).resolve().parent
 _env_path = _project_dir / ".env"
 if _env_path.exists():
+    print("DEBUG: [app.py] Loading .env file...")
     load_dotenv(dotenv_path=_env_path)
 
 # Also load Streamlit Cloud secrets into env vars (if available)
+print("DEBUG: [app.py] Accessing st.secrets...")
 try:
     for key in ["GROQ_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "MODEL_NAME",
                  "FASTAPI_URL", "DATABASE_URL", "JWT_SECRET"]:
         if key in st.secrets:
+            print(f"DEBUG: [app.py] Loading secret key: {key}")
             os.environ[key] = st.secrets[key]
-except Exception:
-    pass
+except Exception as e:
+    print(f"DEBUG: [app.py] Secrets loading failed or skipped: {e}")
 
 FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000").strip()
+print(f"DEBUG: [app.py] FASTAPI_URL is set to: {FASTAPI_URL}")
 
 # ── Page config ────────────────────────────────────────────────────────────────
+print("DEBUG: [app.py] Configuring page...")
 st.set_page_config(
     page_title="AI Destekli LMS",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+print("DEBUG: [app.py] Page configured successfully.")
 
 # ── Premium dark-theme CSS ─────────────────────────────────────────────────────
 st.markdown("""

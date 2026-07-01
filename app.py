@@ -5,11 +5,13 @@ import os
 import hashlib
 import requests
 import streamlit as st
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env
-load_dotenv()
-FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000")
+# Load .env from the same directory as this script
+_env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=_env_path)
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000").strip()
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -270,14 +272,19 @@ def api_post(endpoint: str, payload: dict):
     return None
 
 def check_api_health() -> dict:
-    """Check API health – try up to 2 times with short timeout."""
-    for _ in range(2):
+    """Check API health – try multiple URLs to handle Windows networking quirks."""
+    urls_to_try = [
+        f"{FASTAPI_URL}/health",
+        "http://127.0.0.1:8000/health",
+        "http://localhost:8000/health",
+    ]
+    for url in urls_to_try:
         try:
-            r = requests.get(f"{FASTAPI_URL}/health", timeout=3)
+            r = requests.get(url, timeout=3)
             if r.status_code == 200:
                 return r.json()
         except Exception:
-            pass
+            continue
     return {}
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────

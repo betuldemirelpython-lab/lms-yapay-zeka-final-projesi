@@ -2,11 +2,9 @@
 """Streamlit front-end for the AI-supported LMS (Turkish UI)."""
 
 import os
-import sys
 import hashlib
-import subprocess
-import time
 import requests
+import asyncio
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
@@ -27,43 +25,6 @@ except Exception:
     pass
 
 FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000").strip()
-
-# ── Auto-start FastAPI backend ─────────────────────────────────────────────────
-def _ensure_fastapi_running():
-    """Start FastAPI backend automatically if not already running."""
-    # Quick check – is it already up?
-    try:
-        r = requests.get(f"{FASTAPI_URL}/health", timeout=2)
-        if r.status_code == 200:
-            return True
-    except Exception:
-        pass
-
-    # Not running → launch as background subprocess
-    try:
-        subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "ai_service:app",
-             "--host", "127.0.0.1", "--port", "8000"],
-            cwd=str(_project_dir),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        # Wait until it's ready (max ~8 seconds)
-        for _ in range(8):
-            time.sleep(1)
-            try:
-                r = requests.get(f"{FASTAPI_URL}/health", timeout=2)
-                if r.status_code == 200:
-                    return True
-            except Exception:
-                continue
-    except Exception:
-        pass
-    return False
-
-# Run once per session
-if "fastapi_started" not in st.session_state:
-    st.session_state.fastapi_started = _ensure_fastapi_running()
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -310,21 +271,56 @@ page = None
 def _hash(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
 
-# ── FastAPI helper ─────────────────────────────────────────────────────────────
+# ── FastAPI / Python Local Helper ─────────────────────────────────────────────
 def api_post(endpoint: str, payload: dict):
+    # 1. Try standard FastAPI endpoint
     url = f"{FASTAPI_URL}{endpoint}"
     try:
-        resp = requests.post(url, json=payload, timeout=35)
-        resp.raise_for_status()
-        return resp.json()
-    except requests.exceptions.ConnectionError:
-        st.error("⚠️ FastAPI servisi bağlanamadı. Lütfen `uvicorn ai_service:app` çalıştığından emin olun.")
+        resp = requests.post(url, json=payload, timeout=5)
+        if resp.status_code == 200:
+            return resp.json()
+    except Exception:
+        pass
+
+    # 2. Direct Python import fallback (No HTTP dependency)
+    try:
+        import ai_service
+        
+        # Propagate API keys manually to ensure they are up to date
+        ai_service.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+        ai_service.GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+        ai_service.GROQ_API_KEY   = os.getenv("GROQ_API_KEY", "")
+        ai_service.MODEL_NAME     = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
+        ai_service.PROVIDER       = ai_service._detect_provider()
+
+        if endpoint == "/analyze_text":
+            system_prompt = (
+                "Sen bir eğitim asistanısın. Verilen öğrenci metnini analiz et; "
+                "yapıcı geri bildirim, anahtar kavramlar ve geliştirme önerileri sun. "
+                "Yanıtını Türkçe ver."
+            )
+            result = asyncio.run(ai_service.call_llm([
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": payload["text"]},
+            ]))
+            return {"analysis": result, "provider": ai_service.PROVIDER}
+
+        elif endpoint == "/summarize_content":
+            system_prompt = (
+                "Sen özlü bir özetleyicisin. Verilen metni 2-3 cümleyle özetle; "
+                "ana fikirleri koru. Türkçe yanıt ver."
+            )
+            result = asyncio.run(ai_service.call_llm([
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": payload["content"]},
+            ]))
+            return {"summary": result, "provider": ai_service.PROVIDER}
     except Exception as exc:
-        st.error(f"API hatası: {exc}")
+        st.error(f"AI Servis hatası: {exc}")
     return None
 
 def check_api_health() -> dict:
-    """Check API health – try multiple URLs to handle Windows networking quirks."""
+    # 1. Try standard FastAPI health check
     urls_to_try = [
         f"{FASTAPI_URL}/health",
         "http://127.0.0.1:8000/health",
@@ -332,11 +328,25 @@ def check_api_health() -> dict:
     ]
     for url in urls_to_try:
         try:
-            r = requests.get(url, timeout=3)
+            r = requests.get(url, timeout=1)
             if r.status_code == 200:
-                return r.json()
+                data = r.json()
+                data["internal"] = False
+                return data
         except Exception:
             continue
+
+    # 2. Try direct import fallback (If environment contains credentials)
+    try:
+        import ai_service
+        # Re-detect provider based on active env variables
+        ai_service.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+        ai_service.GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+        ai_service.GROQ_API_KEY   = os.getenv("GROQ_API_KEY", "")
+        provider = ai_service._detect_provider()
+        return {"status": "ok", "provider": provider, "internal": True}
+    except Exception:
+        pass
     return {}
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -386,13 +396,16 @@ else:
     health = check_api_health()
     if health.get("status") == "ok":
         provider = health.get("provider", "?").upper()
-        st.sidebar.success(f"✅ AI Servisi Aktif – {provider}")
+        if health.get("internal"):
+            st.sidebar.success(f"✅ AI Servisi Aktif (Bulut) – {provider}")
+        else:
+            st.sidebar.success(f"✅ AI Servisi Aktif – {provider}")
     else:
         st.sidebar.warning("⚠️ AI Servisi bağlı değil – run_all.bat çalıştırın")
 
     st.sidebar.markdown("---")
 
-    # ── MENÜ: Radio butonları (selectbox yerine) ──
+    # ── MENÜ: Radio & Styling ──
     st.sidebar.markdown("### 📌 Menü")
     page = st.sidebar.radio(
         "Sayfa Seçin",

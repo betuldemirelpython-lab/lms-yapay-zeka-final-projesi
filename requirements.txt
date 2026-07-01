@@ -1,6 +1,6 @@
 streamlit
 fastapi
-uvicorn[standard]
+uvicorn
 pydantic
 sqlalchemy
 python-dotenv
